@@ -6,8 +6,10 @@ namespace App\Infrastructure\Barbershop\Repository;
 
 use App\Domain\Barbershop\Entity\Booking;
 use App\Domain\Barbershop\Exception\NotFoundException;
+use App\Domain\Barbershop\Exception\SlotAlreadyBookedException;
 use App\Domain\Barbershop\Repository\BookingRepositoryInterface;
 use App\Domain\ValueObject\Uuid;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineBookingRepository implements BookingRepositoryInterface
@@ -25,6 +27,11 @@ final class DoctrineBookingRepository implements BookingRepositoryInterface
     public function save(Booking $booking): void
     {
         $this->em->persist($booking);
-        $this->em->flush();
+
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            throw new SlotAlreadyBookedException();
+        }
     }
 }

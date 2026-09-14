@@ -8,11 +8,9 @@ use App\Application\CommandResult;
 use App\Domain\Barbershop\Entity\Booking;
 use App\Domain\Barbershop\Entity\Service;
 use App\Domain\Barbershop\Entity\Stylist;
-use App\Domain\Barbershop\Exception\SlotAlreadyBookedException;
 use App\Domain\Barbershop\Repository\BookingRepositoryInterface;
 use App\Domain\ValueObject\UuidFactory;
 use DateTimeImmutable;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 
@@ -45,11 +43,7 @@ final class CreateBookingCommandHandler
             $command->customerContact,
         );
 
-        try {
-            $this->bookingRepository->save($booking);
-        } catch (UniqueConstraintViolationException) {
-            throw new SlotAlreadyBookedException();
-        }
+        $this->bookingRepository->save($booking);
 
         return new CommandResult($booking->getId()->toString());
     }
