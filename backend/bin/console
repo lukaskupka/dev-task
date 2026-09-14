@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$netteContainer = App\Bootstrap::boot();
+
+$application = new Symfony\Component\Console\Application('Reservio Developer Task', '1.0.0');
+
+// Register all Symfony Console commands from Nette DI
+foreach ($netteContainer->findByType(Symfony\Component\Console\Command\Command::class) as $serviceId) {
+    $application->add($netteContainer->getService($serviceId));
+}
+
+$application->run();

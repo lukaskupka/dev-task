@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Domain\Barbershop\Entity\OpeningHours" table="barbershop_opening_hours">
+
+        <id name="id" type="uuid" />
+
+        <many-to-one field="business"
+                     target-entity="App\Domain\Barbershop\Entity\Business">
+            <join-column name="business_id" referenced-column-name="id" nullable="false" />
+        </many-to-one>
+
+        <field name="dayOfWeek" column="day_of_week" type="integer"
+               enum-type="App\Domain\Barbershop\Enum\DayOfWeek" />
+
+        <field name="openFrom" column="open_from" type="string" length="5" />
+        <field name="openTo"   column="open_to"   type="string" length="5" />
+
+    </entity>
+
+</doctrine-mapping>

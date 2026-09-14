@@ -1,0 +1,127 @@
+extensions:
+    # Common
+    nettrine.cache: Nettrine\Cache\DI\CacheExtension
+
+    # DBAL
+    nettrine.dbal: Nettrine\DBAL\DI\DbalExtension
+    nettrine.dbal.console: Nettrine\DBAL\DI\DbalConsoleExtension
+
+    # ORM
+    nettrine.orm: Nettrine\ORM\DI\OrmExtension
+    nettrine.orm.cache: Nettrine\ORM\DI\OrmCacheExtension
+    nettrine.orm.console: Nettrine\ORM\DI\OrmConsoleExtension
+    nettrine.annotations: Nettrine\Annotations\DI\AnnotationsExtension
+    nettrine.orm.xml: Nettrine\ORM\DI\OrmXmlExtension
+    tactician: Cellar\Tactician\DI\TacticianExtension
+    nettrine.migrations: Nettrine\Migrations\DI\MigrationsExtension
+
+nettrine.dbal:
+    connection:
+        driver: pdo_sqlite
+        path: %appDir%/../var/db.sqlite
+        types:
+            uuid: App\Infrastructure\Doctrine\Type\UuidType
+
+nettrine.orm.xml:
+    mapping:
+        App\Domain: %appDir%/../config/doctrine
+    fileExtension: .dcm.xml
+    simple: false
+
+nettrine.migrations:
+    directories:
+        App\Infrastructure\Migration: %appDir%/../migrations
+
+tactician:
+    commandbus:
+        command:
+            middleware:
+                - @tactician.middleware.locking
+                - @tactician.middleware.command_handler
+        query:
+            middleware:
+                - @tactician.middleware.command_handler
+
+services:
+    - App\Infrastructure\ValueObject\UuidFactory
+    - App\Infrastructure\Barbershop\Repository\DoctrineBusinessRepository
+    - App\Infrastructure\Barbershop\Repository\DoctrineBookingRepository
+    - App\Infrastructure\Barbershop\Repository\DoctrineStylistRepository
+    - App\Infrastructure\Barbershop\Repository\DoctrineServiceRepository
+
+    createBookingHandler:
+        class: App\Application\Barbershop\Command\CreateBooking\CreateBookingCommandHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Command\CreateBooking\CreateBookingCommand
+
+    confirmBookingHandler:
+        class: App\Application\Barbershop\Command\ConfirmBooking\ConfirmBookingCommandHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Command\ConfirmBooking\ConfirmBookingCommand
+
+    rejectBookingHandler:
+        class: App\Application\Barbershop\Command\RejectBooking\RejectBookingCommandHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Command\RejectBooking\RejectBookingCommand
+
+    getBusinessHandler:
+        class: App\Application\Barbershop\Query\GetBusiness\GetBusinessQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetBusiness\GetBusinessQuery
+
+    getBusinessBySlugHandler:
+        class: App\Application\Barbershop\Query\GetBusinessBySlug\GetBusinessBySlugQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetBusinessBySlug\GetBusinessBySlugQuery
+
+    getMyBookingsHandler:
+        class: App\Application\Barbershop\Query\GetMyBookings\GetMyBookingsQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetMyBookings\GetMyBookingsQuery
+
+    getBookingHandler:
+        class: App\Application\Barbershop\Query\GetBooking\GetBookingQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetBooking\GetBookingQuery
+
+    getAvailableSlotsHandler:
+        class: App\Application\Barbershop\Query\GetAvailableSlots\GetAvailableSlotsQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetAvailableSlots\GetAvailableSlotsQuery
+
+
+    getBusinessesHandler:
+        class: App\Application\Barbershop\Query\GetBusinesses\GetBusinessesQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetBusinesses\GetBusinessesQuery
+
+    getBusinessBookingsHandler:
+        class: App\Application\Barbershop\Query\GetBusinessBookings\GetBusinessBookingsQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetBusinessBookings\GetBusinessBookingsQuery
+
+    getStylistHandler:
+        class: App\Application\Barbershop\Query\GetStylist\GetStylistQueryHandler
+        tags:
+            tactician.handler:
+                command: App\Application\Barbershop\Query\GetStylist\GetStylistQuery
+
+    commandBus:
+        type: App\Application\CommandBus
+        factory: App\Infrastructure\Bus\TacticianCommandBus(@tactician.commandbus.command)
+
+    queryBus:
+        type: App\Application\QueryBus
+        factory: App\Infrastructure\Bus\TacticianQueryBus(@tactician.commandbus.query)
+
+    - App\Infrastructure\Console\LoadFixturesCommand

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Domain\Barbershop\Entity\Service" table="barbershop_services">
+
+        <id name="id" type="uuid" />
+
+        <field name="name" type="string" />
+        <field name="durationMinutes" column="duration_minutes" type="integer" />
+        <field name="price" type="decimal" precision="10" scale="2" />
+        <field name="currency" type="string" length="3" />
+
+        <many-to-one field="business"
+                     target-entity="App\Domain\Barbershop\Entity\Business"
+                     inversed-by="services">
+            <join-column name="business_id" referenced-column-name="id" nullable="false" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>
