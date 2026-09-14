@@ -1,0 +1,26 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env.local
+.env.local.*
+!.env.local.example
+
+# Backend (PHP / Nette / Doctrine)
+/backend/vendor/
+/backend/var/*
+!/backend/var/.gitkeep
+/backend/temp/*
+!/backend/temp/.gitkeep
+/backend/logs/*
+!/backend/logs/.gitkeep
+
+# Frontend (Next.js / Node)
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/*.tsbuildinfo
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
