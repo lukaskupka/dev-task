@@ -1,0 +1,6 @@
+nettrine.dbal:
+    connection!:
+        driver: pdo_sqlite
+        memory: true
+        types:
+            uuid: App\Infrastructure\Doctrine\Type\UuidType
