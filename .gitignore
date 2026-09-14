@@ -15,6 +15,7 @@ Thumbs.db
 !/backend/temp/.gitkeep
 /backend/logs/*
 !/backend/logs/.gitkeep
+/backend/.phpunit.result.cache
 
 # Frontend (Next.js / Node)
 /frontend/node_modules/

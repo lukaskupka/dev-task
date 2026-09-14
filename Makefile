@@ -1,4 +1,4 @@
-.PHONY: help up stop down restart bash comin comdu logs fixtures db-reset
+.PHONY: help up stop down restart bash comin comdu logs fixtures db-reset test
 
 help: ## Print help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} \
@@ -42,6 +42,9 @@ fixtures: checkAppIsRunning ## Load database fixtures (purges DB first)
 db-reset: checkAppIsRunning ## Reset DB: run migrations and reload fixtures
 	@$(BASH) -c 'php bin/console migrations:migrate --no-interaction'
 	@$(BASH) -c 'php bin/console fixtures:load'
+
+test: checkAppIsRunning ## Run backend PHPUnit test suite
+	@$(BASH) -c 'vendor/bin/phpunit'
 
 backend/.env.local:
 	@sed -e "s/{MAKEFILE_UID}/$(shell id -u)/g" \
