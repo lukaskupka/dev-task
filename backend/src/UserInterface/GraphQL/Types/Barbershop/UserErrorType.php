@@ -25,6 +25,10 @@ final class UserErrorType extends GraphQLType
                 'type' => Type::nonNull(Type::string()),
                 'description' => 'A human-readable error message',
             ],
+            'code' => [
+                'type' => Type::string(),
+                'description' => 'A stable machine-readable error code, or null for unclassified errors',
+            ],
         ];
     }
 }

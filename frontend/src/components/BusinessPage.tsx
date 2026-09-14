@@ -214,6 +214,7 @@ export default function BusinessPage({ slug }: Props) {
                         {activeStylist && (
                           <div className="px-6 py-5">
                             <StylistSlots
+                              key={activeStylist.id}
                               businessId={business.id}
                               stylistId={activeStylist.id}
                               stylistName={activeStylist.name}

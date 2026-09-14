@@ -1,7 +1,7 @@
 'use client';
 
 import { gql, useMutation } from '@apollo/client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const CREATE_BOOKING = gql`
   mutation CreateBooking($input: CreateBookingInput!, $serviceId: ID!, $date: String!) {
@@ -20,6 +20,7 @@ const CREATE_BOOKING = gql`
       errors {
         field
         message
+        code
       }
     }
   }
@@ -30,13 +31,17 @@ export interface Slot {
   endTime: string;
 }
 
+const BookingErrorCode = {
+  SLOT_TAKEN: 'SLOT_TAKEN',
+} as const;
+
 interface CreateBookingData {
   createBooking: {
     stylist: {
       id: string;
       availableSlots: { edges: { node: Slot }[] };
     } | null;
-    errors: { field: string | null; message: string }[];
+    errors: { field: string | null; message: string; code: string | null }[];
   };
 }
 
@@ -72,6 +77,7 @@ export default function BookingForm({
   const [succeeded, setSucceeded] = useState(false);
 
   const [createBooking, { loading }] = useMutation<CreateBookingData>(CREATE_BOOKING);
+  const isSubmittingRef = useRef(false);
 
   function validateContact(value: string): string {
     const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,34 +90,39 @@ export default function BookingForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (isSubmittingRef.current) return;
+
     const err = validateContact(customerContact);
     setContactError(err);
     if (err) return;
     setServerErrors([]);
 
-    const variables = {
-      variables: {
-        input: { stylistId, serviceId, startTime, customerName, customerContact },
-        serviceId,
-        date,
-      },
-    };
+    isSubmittingRef.current = true;
+    try {
+      const { data } = await createBooking({
+        variables: {
+          input: { stylistId, serviceId, startTime, customerName, customerContact },
+          serviceId,
+          date,
+        },
+      });
 
-    // Simulate double-click: fire two identical requests concurrently
-    const [{ data }] = await Promise.all([
-      createBooking(variables),
-      createBooking(variables),
-    ]);
+      const errors = data?.createBooking.errors ?? [];
+      const slots = data?.createBooking.stylist?.availableSlots.edges.map((e) => e.node) ?? [];
 
-    const errors = data?.createBooking.errors ?? [];
-    if (errors.length > 0) {
-      setServerErrors(errors.map((err) => err.message));
-      return;
+      if (errors.length > 0) {
+        if (errors.some((err) => err.code === BookingErrorCode.SLOT_TAKEN)) {
+          onSuccess(slots);
+        }
+        setServerErrors(errors.map((err) => err.message));
+        return;
+      }
+
+      onSuccess(slots);
+      setSucceeded(true);
+    } finally {
+      isSubmittingRef.current = false;
     }
-
-    const slots = data?.createBooking.stylist?.availableSlots.edges.map((e) => e.node) ?? [];
-    onSuccess(slots);
-    setSucceeded(true);
   }
 
   if (succeeded) {
